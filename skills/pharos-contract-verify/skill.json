@@ -1,0 +1,7 @@
+{
+  "name": "pharos-contract-verify",
+  "version": "1.0.0",
+  "description": "Verify any deployed Solidity contract on Pharos Atlantic Testnet or Pacific Mainnet via Blockscout. Handles constructor args, compiler flags, retry on indexer delay.",
+  "dependsOn": [],
+  "keywords": ["verify", "verification", "blockscout", "explorer", "sourcecode", "abi", "constructor"]
+}

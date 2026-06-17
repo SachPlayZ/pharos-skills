@@ -1,0 +1,24 @@
+{
+  "testnet": {
+    "name": "Atlantic Testnet",
+    "chainId": 688689,
+    "rpc": "https://atlantic.dplabs-internal.com",
+    "wss": "wss://atlantic.dplabs-internal.com",
+    "explorer": "https://atlantic.pharosscan.xyz",
+    "nativeSymbol": "PHRS",
+    "verifierUrl": "https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract",
+    "verifierType": "blockscout",
+    "rateLimit": "500/5min",
+    "maxPendingTx": 64,
+    "caip2": "eip155:688689"
+  },
+  "mainnet": {
+    "name": "Pacific Mainnet",
+    "chainId": 1672,
+    "rpc": "https://rpc.pharos.xyz",
+    "explorer": "https://www.pharosscan.xyz",
+    "nativeSymbol": "PROS",
+    "caip2": "eip155:1672",
+    "WARNING": "MAINNET — real value. Requires explicit user confirmation before any write op."
+  }
+}

@@ -1,0 +1,32 @@
+# Secrets — NEVER commit
+.env
+.env.local
+.private_key
+private_key.txt
+*.key
+
+# Node
+node_modules
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# Pharos runtime files
+.pharos/spend-ledger.json
+.pharos/allowlist.json
+.pharos/salts.json
+
+# Demo
+demo/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log

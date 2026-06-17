@@ -1,0 +1,7 @@
+{
+  "name": "pharos-x402-payments",
+  "version": "1.0.0",
+  "description": "Full x402 HTTP payment stack on Pharos Network. Scaffold server (Express + paymentMiddleware), client (wrapFetchWithPayment), and facilitator. Agent can monetize endpoints and autonomously pay for others.",
+  "dependsOn": ["pharos-agent-wallet"],
+  "keywords": ["x402", "http payments", "micropayments", "monetize", "paywall", "api payments", "eip155", "express middleware", "payment facilitator"]
+}

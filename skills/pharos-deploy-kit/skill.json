@@ -1,0 +1,7 @@
+{
+  "name": "pharos-deploy-kit",
+  "version": "1.0.0",
+  "description": "Deploy Solidity contracts to Pharos Network using standard forge script or deterministic CREATE2/CREATE3. Handles dry-run, broadcast, salt management, and cross-network address prediction.",
+  "dependsOn": ["pharos-contract-verify"],
+  "keywords": ["deploy", "forge", "script", "create2", "create3", "deterministic", "broadcast", "salt", "address-prediction"]
+}

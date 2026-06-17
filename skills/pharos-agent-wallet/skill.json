@@ -1,0 +1,7 @@
+{
+  "name": "pharos-agent-wallet",
+  "version": "1.0.0",
+  "description": "Autonomous agent wallet management for Pharos Network. Balance preflight, gas estimation, nonce management, per-session spend caps, recipient allowlists, and simulate-then-send pattern.",
+  "dependsOn": [],
+  "keywords": ["wallet", "balance", "gas", "nonce", "spend-cap", "allowlist", "simulate", "send", "estimate", "budget"]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "pharos-skills-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["cli"],
+  "scripts": {
+    "build": "npm run build --workspace=cli",
+    "test": "npm run test --workspace=cli",
+    "install:cli": "npm install --workspace=cli"
+  }
+}

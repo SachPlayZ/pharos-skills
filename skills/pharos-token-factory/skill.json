@@ -1,0 +1,7 @@
+{
+  "name": "pharos-token-factory",
+  "version": "1.0.0",
+  "description": "Deploy and manage ERC20, ERC721, and ERC1155 tokens on Pharos Network using audited OpenZeppelin contracts. Handles deploy, verify, mint, burn, pause, and ownership transfer.",
+  "dependsOn": ["pharos-deploy-kit", "pharos-contract-verify"],
+  "keywords": ["token", "erc20", "erc721", "erc1155", "nft", "mint", "burn", "pause", "deploy token", "create token", "fungible", "non-fungible"]
+}

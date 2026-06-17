@@ -1,0 +1,7 @@
+{
+  "name": "pharos-safe-multisig",
+  "version": "1.0.0",
+  "description": "Deploy and manage Gnosis Safe multisig wallets on Pharos Network. Treasury management, ownership transfer, multi-owner transactions, and contract ownership via Safe.",
+  "dependsOn": [],
+  "keywords": ["safe", "multisig", "gnosis", "treasury", "owners", "threshold", "proposal", "execute", "ownership"]
+}
