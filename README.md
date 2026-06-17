@@ -2,6 +2,10 @@
 
 Six production-grade composable Skills for on-chain operations on the **Pharos Network**, plus a CLI installer modeled after the Vercel Skills CLI.
 
+```bash
+npx pharos-skills add <skill> [--dir .] [--network testnet|mainnet]
+```
+
 A **Pharos Skill** is a folder that a coding agent (Claude Code, opencode, etc.) reads at runtime: `SKILL.md` is the entry point, `references/*.md` contain exact command specs, and `assets/` holds contracts and templates. The agent reads the Capability Index in `SKILL.md` → matches user intent → opens the linked reference → runs the exact `cast`/`forge` command.
 
 ---

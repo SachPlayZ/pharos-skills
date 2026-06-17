@@ -7,7 +7,6 @@ private_key.txt
 
 # Node
 node_modules
-node_modules/
 dist/
 *.tsbuildinfo
 
