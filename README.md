@@ -3,7 +3,7 @@
 Six production-grade composable Skills for on-chain operations on the **Pharos Network**, plus a CLI installer modeled after the Vercel Skills CLI.
 
 ```bash
-npx pharos-skills add <skill> [--dir .] [--network testnet|mainnet]
+npx pharos-skills add <skill>
 ```
 
 A **Pharos Skill** is a folder that a coding agent (Claude Code, opencode, etc.) reads at runtime: `SKILL.md` is the entry point, `references/*.md` contain exact command specs, and `assets/` holds contracts and templates. The agent reads the Capability Index in `SKILL.md` → matches user intent → opens the linked reference → runs the exact `cast`/`forge` command.
@@ -35,17 +35,24 @@ pharos-x402-payments     ──→ pharos-agent-wallet
 ## Install
 
 ```bash
-npx pharos-skills add <skill> [--dir .] [--network testnet|mainnet]
+npx pharos-skills add <skill>
 ```
 
-Examples:
+The CLI will prompt you to pick your editor(s) and install scope (local or global). Use arrow keys to move, space to select/deselect, and enter to confirm.
 
 ```bash
-# Install token factory + all deps (verify + deploy-kit)
-npx pharos-skills add pharos-token-factory --dir ./my-project
+# Install a specific skill (+ its dependencies)
+npx pharos-skills add pharos-token-factory
 
-# Install x402 payments + agent-wallet dep
-npx pharos-skills add pharos-x402-payments --dir ./my-project
+# Install all 6 skills at once
+npx pharos-skills add-all
+
+# Skip prompts (CI / non-interactive)
+npx pharos-skills add pharos-token-factory --yes
+npx pharos-skills add-all --yes
+
+# Install into a specific directory
+npx pharos-skills add pharos-token-factory --dir ./my-project
 
 # See all skills
 npx pharos-skills list

@@ -83,3 +83,18 @@ export function resolveDependencies(skillName: string): string[] {
   visit(skillName);
   return order;
 }
+
+/** Topological sort of the entire skill graph — deduped, deps first. */
+export function resolveAll(): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const skillName of Object.keys(SKILLS)) {
+    for (const name of resolveDependencies(skillName)) {
+      if (!seen.has(name)) {
+        seen.add(name);
+        result.push(name);
+      }
+    }
+  }
+  return result;
+}

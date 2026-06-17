@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import chalk from "chalk";
-import { SKILLS, resolveDependencies } from "./registry.js";
-import { installSkills, listInstalled } from "./install.js";
+import { checkbox, select } from "@inquirer/prompts";
+import { homedir } from "os";
+import { SKILLS, resolveDependencies, resolveAll } from "./registry.js";
+import { installSkills } from "./install.js";
 import { resolve } from "path";
 
 const program = new Command();
@@ -30,11 +32,7 @@ program
       console.log();
     }
 
-    console.log(
-      chalk.dim(
-        'Add a skill: pharos-skills add <skill> [--dir .] [--network testnet|mainnet]'
-      )
-    );
+    console.log(chalk.dim("Add a skill: pharos-skills add <skill>"));
   });
 
 // ── info ──────────────────────────────────────────────────────────────────────
@@ -70,9 +68,7 @@ program
       console.error(chalk.red(`Dependency error: ${(e as Error).message}`));
     }
 
-    console.log(
-      chalk.dim(`\nInstall: pharos-skills add ${skillName}`)
-    );
+    console.log(chalk.dim(`\nInstall: pharos-skills add ${skillName}`));
   });
 
 // ── add ───────────────────────────────────────────────────────────────────────
@@ -80,31 +76,65 @@ program
 program
   .command("add <skill>")
   .description("Install a skill (and its dependencies) into your project")
-  .option("--dir <path>", "Target directory", ".")
-  .option("--network <net>", "testnet or mainnet", "testnet")
-  .action(async (skillName: string, opts: { dir: string; network: string }) => {
+  .option("--dir <path>", "Target directory (skips scope prompt)")
+  .option("-y, --yes", "Skip prompts, use defaults (local, all editors)")
+  .action(async (skillName: string, opts: { dir?: string; yes?: boolean }) => {
     if (!SKILLS[skillName]) {
       console.error(chalk.red(`Unknown skill: "${skillName}"`));
       console.error(chalk.dim('Run "pharos-skills list" to see available skills.'));
       process.exit(1);
     }
 
-    if (opts.network !== "testnet" && opts.network !== "mainnet") {
-      console.error(chalk.red(`--network must be "testnet" or "mainnet"`));
-      process.exit(1);
+    const isInteractive = process.stdin.isTTY && !opts.yes;
+
+    if (isInteractive) {
+      console.log(chalk.dim("  ↑↓ move   space select/deselect   enter confirm\n"));
     }
 
-    if (opts.network === "mainnet") {
-      console.warn(
-        chalk.yellow(
-          "\n⚠️  MAINNET selected. All operations use real value on Pacific Mainnet (chainId 1672).\n" +
-          "   Every write transaction will require explicit confirmation.\n"
-        )
-      );
+    // ── Prompt: editors ───────────────────────────────────────────────────────
+    let editors: string[] = ["all"];
+    if (isInteractive) {
+      editors = await checkbox({
+        message: "Which AI code editors are you targeting?",
+        choices: [
+          { name: "Claude Code", value: "claude-code", checked: true },
+          { name: "Cursor", value: "cursor" },
+          { name: "opencode", value: "opencode" },
+          { name: "Windsurf", value: "windsurf" },
+          { name: "Other / all", value: "other" },
+        ],
+        validate: (ans) => ans.length > 0 || "Select at least one.",
+      });
     }
 
-    const targetDir = resolve(opts.dir);
+    // ── Prompt: scope (skip if --dir was explicitly provided) ─────────────────
+    let scope: "local" | "global" = "local";
+    if (isInteractive && !opts.dir) {
+      scope = await select({
+        message: "Install scope?",
+        choices: [
+          {
+            name: "Local  — this project only",
+            value: "local",
+            description: "Installs into .pharos/ in the current directory",
+          },
+          {
+            name: "Global — all projects",
+            value: "global",
+            description: `Installs into ~/.pharos/ (${homedir()}/.pharos/)`,
+          },
+        ],
+      });
+    }
 
+    const targetDir =
+      opts.dir
+        ? resolve(opts.dir)
+        : scope === "global"
+          ? homedir()
+          : resolve(".");
+
+    // ── Resolve deps ──────────────────────────────────────────────────────────
     let resolved: string[];
     try {
       resolved = resolveDependencies(skillName);
@@ -113,17 +143,94 @@ program
       process.exit(1);
     }
 
-    console.log(chalk.bold(`\nInstalling ${skillName} into ${targetDir}\n`));
+    console.log(chalk.bold(`\nInstalling ${skillName}\n`));
     console.log(`Install order:`);
     resolved.forEach((s, i) => console.log(`  ${i + 1}. ${s}`));
     console.log();
 
     try {
-      await installSkills(resolved, targetDir, opts.network as "testnet" | "mainnet");
-      console.log(chalk.green(`\n✓ Installation complete!`));
+      await installSkills(resolved, targetDir, { global: scope === "global", editors });
+      console.log(chalk.green(`\n✓ Done!`));
       console.log(
         chalk.dim(
-          `  Skills installed: ${resolved.join(", ")}\n` +
+          `  Skills: ${resolved.join(", ")}\n` +
+          `  Location: ${targetDir}${scope === "global" ? "/.pharos/" : "/.pharos/"}`
+        )
+      );
+    } catch (e) {
+      console.error(chalk.red(`Installation failed: ${(e as Error).message}`));
+      process.exit(1);
+    }
+  });
+
+// ── add-all ───────────────────────────────────────────────────────────────────
+
+program
+  .command("add-all")
+  .description("Install all available skills (and their dependencies)")
+  .option("--dir <path>", "Target directory (skips scope prompt)")
+  .option("-y, --yes", "Skip prompts, use defaults (local, all editors)")
+  .action(async (opts: { dir?: string; yes?: boolean }) => {
+    const isInteractive = process.stdin.isTTY && !opts.yes;
+
+    if (isInteractive) {
+      console.log(chalk.dim("  ↑↓ move   space select/deselect   enter confirm\n"));
+    }
+
+    // ── Prompt: editors ───────────────────────────────────────────────────────
+    let editors: string[] = ["all"];
+    if (isInteractive) {
+      editors = await checkbox({
+        message: "Which AI code editors are you targeting?",
+        choices: [
+          { name: "Claude Code", value: "claude-code", checked: true },
+          { name: "Cursor", value: "cursor" },
+          { name: "opencode", value: "opencode" },
+          { name: "Windsurf", value: "windsurf" },
+          { name: "Other / all", value: "other" },
+        ],
+        validate: (ans) => ans.length > 0 || "Select at least one.",
+      });
+    }
+
+    // ── Prompt: scope ─────────────────────────────────────────────────────────
+    let scope: "local" | "global" = "local";
+    if (isInteractive && !opts.dir) {
+      scope = await select({
+        message: "Install scope?",
+        choices: [
+          {
+            name: "Local  — this project only",
+            value: "local",
+            description: "Installs into .pharos/ in the current directory",
+          },
+          {
+            name: "Global — all projects",
+            value: "global",
+            description: `Installs into ~/.pharos/ (${homedir()}/.pharos/)`,
+          },
+        ],
+      });
+    }
+
+    const targetDir = opts.dir
+      ? resolve(opts.dir)
+      : scope === "global"
+        ? homedir()
+        : resolve(".");
+
+    const resolved = resolveAll();
+
+    console.log(chalk.bold(`\nInstalling all ${resolved.length} skills\n`));
+    resolved.forEach((s, i) => console.log(`  ${i + 1}. ${s}`));
+    console.log();
+
+    try {
+      await installSkills(resolved, targetDir, { global: scope === "global", editors });
+      console.log(chalk.green(`\n✓ Done!`));
+      console.log(
+        chalk.dim(
+          `  Skills: ${resolved.join(", ")}\n` +
           `  Location: ${targetDir}/.pharos/`
         )
       );
