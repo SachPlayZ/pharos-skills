@@ -22,11 +22,12 @@ describe("installSkills", () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("installs pharos-contract-verify into target dir", async () => {
+  it("installs pharos-contract-verify into .claude/skills and .agents/skills", async () => {
     const skills = resolveDependencies("pharos-contract-verify");
     await installSkills(skills, tmpDir);
 
-    expect(existsSync(join(tmpDir, ".pharos", "skills", "pharos-contract-verify"))).toBe(true);
+    expect(existsSync(join(tmpDir, ".claude",  "skills", "pharos-contract-verify"))).toBe(true);
+    expect(existsSync(join(tmpDir, ".agents", "skills", "pharos-contract-verify"))).toBe(true);
     expect(existsSync(join(tmpDir, ".pharos", "shared"))).toBe(true);
     expect(existsSync(join(tmpDir, "SKILL.md"))).toBe(true);
   });
@@ -50,18 +51,18 @@ describe("installSkills", () => {
 
     expect(content1).toBe(content2);
 
-    // Count rows — should not double
     const rows = content2.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| User Need") && !l.startsWith("|---"));
     const rowCount1 = content1.split("\n").filter((l) => l.startsWith("| ") && !l.startsWith("| User Need") && !l.startsWith("|---")).length;
     expect(rows.length).toBe(rowCount1);
   });
 
-  it("installs token-factory with all transitive deps", async () => {
+  it("installs token-factory with all transitive deps in both skill dirs", async () => {
     const skills = resolveDependencies("pharos-token-factory");
     await installSkills(skills, tmpDir);
 
     for (const s of skills) {
-      expect(existsSync(join(tmpDir, ".pharos", "skills", s))).toBe(true);
+      expect(existsSync(join(tmpDir, ".claude",  "skills", s))).toBe(true);
+      expect(existsSync(join(tmpDir, ".agents", "skills", s))).toBe(true);
     }
   });
 

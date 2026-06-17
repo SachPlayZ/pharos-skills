@@ -18,56 +18,55 @@ export async function installSkills(
 ): Promise<void> {
   const { global: isGlobal = false, editors = ["all"] } = options;
 
-  const pharosDir = join(targetDir, ".pharos");
-  const skillsDir = join(pharosDir, "skills");
-  const sharedDir = join(pharosDir, "shared");
+  // Skills are installed to two locations so every major AI editor picks them up:
+  //   .claude/skills/<name>/  → Claude Code slash commands (local or ~/.claude/ global)
+  //   .agents/skills/<name>/  → cross-editor convention (Cursor, opencode, Windsurf, etc.)
+  // Shared guardrail assets live in .pharos/shared/ (consistent path SKILL.md references).
 
-  // For global installs SKILL.md lives inside .pharos/; for local it sits in project root
-  const skillMdPath = isGlobal
-    ? join(pharosDir, "SKILL.md")
-    : join(targetDir, "SKILL.md");
+  const claudeSkillsDir = join(targetDir, ".claude",  "skills");
+  const agentsSkillsDir = join(targetDir, ".agents", "skills");
+  const sharedDir       = join(targetDir, ".pharos",  "shared");
 
-  mkdirSync(skillsDir, { recursive: true });
+  mkdirSync(claudeSkillsDir, { recursive: true });
+  mkdirSync(agentsSkillsDir, { recursive: true });
 
-  // 1. Copy shared/
+  // 1. Shared guardrail assets
   const srcShared = join(REPO_ROOT, "shared");
   if (existsSync(srcShared)) {
     cpSync(srcShared, sharedDir, { recursive: true });
     console.log(`  ✓ shared assets → .pharos/shared/`);
   }
 
-  // 2. Copy each skill
+  // 2. Install each skill into both discovery directories
   for (const skillName of skills) {
     const srcSkill = join(REPO_ROOT, "skills", skillName);
-    const dstSkill = join(skillsDir, skillName);
+    if (!existsSync(srcSkill)) throw new Error(`Skill source not found: ${srcSkill}`);
 
-    if (!existsSync(srcSkill)) {
-      throw new Error(`Skill source not found: ${srcSkill}`);
-    }
-
-    cpSync(srcSkill, dstSkill, { recursive: true });
-    console.log(`  ✓ ${skillName} → .pharos/skills/${skillName}/`);
+    cpSync(srcSkill, join(claudeSkillsDir, skillName), { recursive: true });
+    cpSync(srcSkill, join(agentsSkillsDir, skillName), { recursive: true });
+    console.log(`  ✓ ${skillName} → .claude/skills/ + .agents/skills/`);
   }
 
-  // 3. Merge SKILL.md
+  // 3. Merged SKILL.md for editors that don't auto-discover skill folders
   const installedSkills: Array<{ name: string; content: string }> = [];
   for (const skillName of skills) {
-    const skillMdSrc = join(skillsDir, skillName, "SKILL.md");
-    if (existsSync(skillMdSrc)) {
-      installedSkills.push({ name: skillName, content: readFileSync(skillMdSrc, "utf-8") });
-    }
+    const p = join(claudeSkillsDir, skillName, "SKILL.md");
+    if (existsSync(p)) installedSkills.push({ name: skillName, content: readFileSync(p, "utf-8") });
   }
-
   const mergedContent = mergeSkillMd(installedSkills);
-  writeFileSync(skillMdPath, mergedContent);
-  console.log(`  ✓ SKILL.md (merged Capability Index) → ${isGlobal ? ".pharos/SKILL.md" : "SKILL.md"}`);
+  const mergedPath = isGlobal
+    ? join(targetDir, ".claude", "pharos", "SKILL.md")
+    : join(targetDir, "SKILL.md");
+  mkdirSync(dirname(mergedPath), { recursive: true });
+  writeFileSync(mergedPath, mergedContent);
+  console.log(`  ✓ SKILL.md (merged) → ${isGlobal ? ".claude/pharos/SKILL.md" : "SKILL.md"}`);
 
-  // 4. Editor-specific next steps
-  const skillMdDisplay = isGlobal ? `${targetDir}/.pharos/SKILL.md` : `${targetDir}/SKILL.md`;
+  // 4. Next steps
+  const triggers = skills.map(s => `/${s}`).join(", ");
   const includesClaudeCode = editors.includes("claude-code") || editors.includes("other");
-  const includesCursor = editors.includes("cursor") || editors.includes("other");
-  const includesOpencode = editors.includes("opencode") || editors.includes("other");
-  const includesWindsurf = editors.includes("windsurf") || editors.includes("other");
+  const includesCursor     = editors.includes("cursor")      || editors.includes("other");
+  const includesOpencode   = editors.includes("opencode")    || editors.includes("other");
+  const includesWindsurf   = editors.includes("windsurf")    || editors.includes("other");
 
   console.log(`\nNext steps:`);
   console.log(`  1. Install Foundry (if needed):`);
@@ -80,31 +79,24 @@ export async function installSkills(
   console.log(`       .pharos/shared/references/_guardrails.md`);
 
   if (includesClaudeCode) {
-    console.log(`\n  Claude Code — SKILL.md is auto-loaded if in your project root.`);
-    if (isGlobal) {
-      console.log(`    Add to your global Claude Code context:`);
-      console.log(`      echo "${skillMdDisplay}" >> ~/.claude/context`);
-    }
+    console.log(`\n  Claude Code → type ${triggers} to invoke.`);
   }
   if (includesCursor) {
-    console.log(`\n  Cursor — reference SKILL.md in your .cursorrules:`);
-    console.log(`    @${skillMdDisplay}`);
+    console.log(`\n  Cursor → skills available via .agents/skills/ agent context.`);
   }
   if (includesOpencode) {
-    console.log(`\n  opencode — add SKILL.md to your system prompt context:`);
-    console.log(`    ${skillMdDisplay}`);
+    console.log(`\n  opencode → skills available via .agents/skills/ agent context.`);
   }
   if (includesWindsurf) {
-    console.log(`\n  Windsurf — add SKILL.md to your global rules or Cascade context:`);
-    console.log(`    ${skillMdDisplay}`);
+    console.log(`\n  Windsurf → skills available via .agents/skills/ agent context.`);
   }
   console.log();
 }
 
 export function listInstalled(targetDir: string): string[] {
-  const skillsDir = join(targetDir, ".pharos", "skills");
-  if (!existsSync(skillsDir)) return [];
-  return readdirSync(skillsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
+  const dir = join(targetDir, ".claude", "skills");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
 }
