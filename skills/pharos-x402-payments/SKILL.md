@@ -8,7 +8,7 @@ description: Scaffold and operate the full x402 HTTP micropayment stack on Pharo
 ## Prerequisites
 
 ```bash
-which node && node --version || { echo "Install Node.js >= 18"; exit 1; }
+which node && node --version || { echo "Install Node.js >= 20"; exit 1; }
 which cast || (echo "Install Foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup" && exit 1)
 ```
 

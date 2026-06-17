@@ -7,7 +7,7 @@ test = "test"
 optimizer = true
 optimizer_runs = 200
 via_ir = true
-solc_version = "0.8.24"
+solc_version = "0.8.35"
 remappings = [
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
 ]

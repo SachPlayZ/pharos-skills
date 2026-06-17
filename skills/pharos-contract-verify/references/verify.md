@@ -15,7 +15,7 @@ forge verify-contract <CONTRACT_ADDR> src/<PATH>:<CONTRACT_NAME> \
   --chain-id 688689 \
   --verifier-url https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract \
   --verifier blockscout \
-  --compiler-version 0.8.24 \
+  --compiler-version 0.8.35 \
   --optimizer-runs 200 \
   --watch
 ```
@@ -69,7 +69,7 @@ forge verify-contract <CONTRACT_ADDR> src/<PATH>:<CONTRACT_NAME> \
   --chain-id 688689 \
   --verifier-url https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract \
   --verifier blockscout \
-  --compiler-version 0.8.24 \
+  --compiler-version 0.8.35 \
   --optimizer-runs 200 \
   --constructor-args $ENCODED \
   --watch
@@ -144,7 +144,7 @@ forge verify-contract <CONTRACT_ADDR> src/<PATH>:<CONTRACT_NAME> \
   --chain-id 688689 \
   --verifier-url https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract \
   --verifier blockscout \
-  --compiler-version 0.8.24 \
+  --compiler-version 0.8.35 \
   --optimizer-runs 200 \
   --watch
 # Blockscout will accept re-verification if source matches
@@ -174,7 +174,7 @@ for i in 1 2 3 4 5; do
     --chain-id 688689 \
     --verifier-url https://api.socialscan.io/pharos-atlantic-testnet/v1/explorer/command_api/contract \
     --verifier blockscout \
-    --compiler-version 0.8.24 \
+    --compiler-version 0.8.35 \
     --optimizer-runs 200 \
     --watch && break
   echo "Not indexed yet. Waiting 15s..."
@@ -213,4 +213,4 @@ Returns `true` if verified, `false` if not.
 | `already verified` | Contract source already on explorer | Not an error — output explorer link and stop |
 | `rate limit exceeded` | >500 requests / 5min | Wait 5 minutes, retry |
 | `invalid chain id` | Wrong `--chain-id` flag | Read from `networks.json`, use `688689` (testnet) or `1672` (mainnet) |
-| `Compiler version not found` | Specified version not available on verifier | Check available versions; try `solc` minor version (e.g., `0.8.24+commit.e11b9ed9`) |
+| `Compiler version not found` | Specified version not available on verifier | Check available versions; try `solc` minor version (e.g., `0.8.35`) |
