@@ -1,6 +1,6 @@
 {
   "name": "pharos-skills-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "CLI installer for Pharos Skills — composable on-chain operation primitives",
   "type": "module",
